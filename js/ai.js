@@ -106,11 +106,11 @@ function parseJson(text) {
 function persona(state) {
   const name = state.profile.name || 'Player';
   return `You are THE SYSTEM, the AI drill sergeant running ${name}'s 90-day transformation app (Solo Leveling style).
-${name} is maxing six pillars: Looksmax (gym, physique, skincare, grooming), Engineermax (LeetCode/DSA, shipping side projects, CS fundamentals), Charactermax (discipline, waking on time, staying clean from PMO, no doomscrolling), Appealmax (style, presence, voice, social/charisma reps), Religiousmax (Islam: 5 daily salah on time, Quran, adhkar), Intellectmax (reading, journaling).
+${name} is maxing six pillars: Looksmax (gym, physique, skincare, grooming), Engineermax (LeetCode/DSA, shipping side projects, CS fundamentals), Charactermax (discipline, waking on time, staying clean from PMO, no doomscrolling), Appealmax (style, presence, voice, social/charisma reps), Mindmax (meditation, stoic reflection, gratitude, no complaining, phone-free time, emotional control), Intellectmax (reading, journaling).
 ${name} works a 9-5 job, so plans must fit around work hours.
 
-VOICE: drill sergeant. Brutally honest, short punchy sentences, swearing is allowed (fuck, shit, damn). Call out exact numbers from the data: missed prayers, % completion, streaks lost, XP lost. If they lagged, tell them exactly how fucked they are and what it cost. If they did well, acknowledge it hard but raise the bar. ALWAYS end with the concrete fix.
-RULES: Never mock Islam or Allah; push deen with respect and seriousness (you may swear about their laziness, never about religion). No dangerous advice: no steroids/PEDs, no starving or crash diets, no bone smashing or other harmful looksmax trends, no sleep deprivation. Keep training advice safe and progressive. You may occasionally write "[SYSTEM]" lines for flavor.
+VOICE: drill sergeant. Brutally honest, short punchy sentences, swearing is allowed (fuck, shit, damn). Call out exact numbers from the data: missed quests, % completion, streaks lost, XP lost. If they lagged, tell them exactly how fucked they are and what it cost. If they did well, acknowledge it hard but raise the bar. ALWAYS end with the concrete fix.
+RULES: No dangerous advice: no steroids/PEDs, no starving or crash diets, no bone smashing or other harmful looksmax trends, no sleep deprivation. Keep training advice safe and progressive. You may occasionally write "[SYSTEM]" lines for flavor.
 If you lack important info about them, ask ONE sharp question to refine your coaching.`;
 }
 
@@ -140,13 +140,11 @@ export function buildContext(state) {
   const st = streaks(state);
   const weak = weakestPillars(state).slice(0, 3).map(w => `${PILLARS[w.pillar].name} ${w.pct}%`).join(', ');
   const recent = timeline(state).slice(-4).map(([k]) => fmtDay(state, k)).join('\n');
-  const times = state.prayerTimes[today];
   const pillarLine = Object.entries(stats.pillarXp).map(([k, v]) => `${PILLARS[k].tag} ${v}xp`).join(', ');
   const mem = state.memory.slice(-15).map(m => `- Q: ${m.q} A: ${m.a}`).join('\n');
 
   return `=== PLAYER FILE ===
 Name: ${p.name || '?'} | Age: ${p.age || '?'} | Height: ${p.heightCm || '?'}cm | Weight: ${p.weightKg || '?'}kg -> goal ${p.goalWeightKg || '?'}kg
-Location: ${[p.city, p.country].filter(Boolean).join(', ') || '?'}
 Schedule: wakes ${p.wakeTime}, sleeps ${p.sleepTime}, works ${p.workStart}-${p.workEnd}, prefers gym in the ${p.gymTime}
 LeetCode solved at start: ${p.leetcodeSolved || '?'}
 90-day goals: ${p.goals || '?'}
@@ -157,7 +155,6 @@ Today: ${today}, Day ${n} of ${PROGRAM_DAYS} (${phaseFor(n).name}). Days left: $
 Level ${stats.level}, ${stats.rank.title}, total XP ${stats.total} (lifetime penalties -${stats.penalties}).
 Pillar XP: ${pillarLine}
 Streak: ${st.current} days (best ${st.best}). Weakest pillars this week: ${weak || 'n/a'}.
-${times ? `Prayer times today: ${Object.entries(times).map(([k, v]) => `${k} ${v}`).join(', ')}` : ''}
 === RECENT DAYS ===
 ${recent}`;
 }
@@ -180,11 +177,11 @@ Build today's battle plan. Respond with ONLY a JSON object:
 {
   "verdict": "2-4 sentences judging yesterday in your voice (if no data for yesterday, judge their start)",
   "focus": "one line: the single most important thing today",
-  "schedule": [{"time": "HH:MM", "task": "short task", "pillar": "deen|looks|engineer|character|appeal|intellect"}],
+  "schedule": [{"time": "HH:MM", "task": "short task", "pillar": "looks|engineer|character|appeal|mind|intellect"}],
   "bonus": [{"title": "specific extra quest targeting their weakest pillar", "pillar": "...", "xp": 15-40}],
   "question": "one sharp question to refine your coaching, or empty string"
 }
-Schedule: 10-16 time blocks from wake to sleep, built around the 9-5 job, all 5 prayers at their real times, gym at their preferred time. Bonus: 1-3 quests, concrete and measurable.` },
+Schedule: 10-16 time blocks from wake to sleep, built around the 9-5 job, with a meditation block and the gym at their preferred time. Bonus: 1-3 quests, concrete and measurable.` },
   ];
   const plan = await groq(state, messages, { json: true, temperature: 0.8, maxTokens: 1600 });
   plan.schedule = Array.isArray(plan.schedule) ? plan.schedule.filter(s => s && s.task) : [];
@@ -244,14 +241,14 @@ Design their 90-day blueprint. Respond with ONLY a JSON object:
 {
   "headline": "one brutal line on who they become by day 90",
   "phases": [
-    {"name": "Phase I: Awakening (Days 1-30)", "goals": {"looks": "...", "engineer": "...", "character": "...", "appeal": "...", "deen": "...", "intellect": "..."}},
+    {"name": "Phase I: Awakening (Days 1-30)", "goals": {"looks": "...", "engineer": "...", "character": "...", "appeal": "...", "mind": "...", "intellect": "..."}},
     {"name": "Phase II: The Forge (Days 31-60)", "goals": {...}},
     {"name": "Phase III: Ascension (Days 61-90)", "goals": {...}}
   ],
   "nonNegotiables": ["5-7 daily rules"],
   "warning": "what will make them fail, based on their weaknesses"
 }
-Goals must be specific and measurable (numbers: kg, problems solved, pages, projects shipped, prayers on time).` },
+Goals must be specific and measurable (numbers: kg, problems solved, pages, projects shipped, meditation minutes).` },
   ];
   return groq(state, messages, { json: true, temperature: 0.7, maxTokens: 1800 });
 }
