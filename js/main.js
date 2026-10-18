@@ -120,7 +120,7 @@ function toggleQuest(id) {
     openModal(`<div class="center">
       <div class="sys">[SYSTEM]</div>
       <div class="big">${rankUp ? 'RANK UP' : 'LEVEL UP'}</div>
-      <p style="font-family:var(--display);font-size:18px">LV ${before.level} → <b style="color:var(--glow)">LV ${after.level}</b></p>
+      <p class="lv-change">LV ${before.level} → <b style="color:var(--glow)">LV ${after.level}</b></p>
       ${rankUp ? `<p style="color:var(--gold);font-family:var(--display)">You are now ${V.esc(after.rank.title)}</p>` : ''}
       <button class="btn primary block" data-act="close-modal">Continue</button></div>`);
   }

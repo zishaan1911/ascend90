@@ -22,7 +22,7 @@ const gradeColor = g => ({ S: 'var(--gold)', A: 'var(--good)', B: 'var(--glow)',
 
 function ring(value, color = 'var(--glow)') {
   const r = 36, c = 2 * Math.PI * r;
-  return `<svg width="84" height="84" viewBox="0 0 84 84" aria-hidden="true">
+  return `<svg viewBox="0 0 84 84" aria-hidden="true">
     <circle cx="42" cy="42" r="${r}" fill="none" stroke="rgba(58,209,255,0.1)" stroke-width="7"/>
     <circle cx="42" cy="42" r="${r}" fill="none" stroke="${color}" stroke-width="7" stroke-linecap="round"
       stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - value / 100)}" style="filter:drop-shadow(0 0 5px ${color});transition:stroke-dashoffset .5s"/>
@@ -89,7 +89,7 @@ function briefingPanel(state, ui, day) {
   let body;
   if (ui.busy.plan) body = loading('THE SYSTEM IS CALCULATING YOUR DAY...');
   else if (!plan) {
-    body = `<p style="margin:0 0 12px;color:var(--muted)">The System builds your schedule around work, salah and the gym, judges yesterday, and adds bonus quests for your weakest pillar.</p>
+    body = `<p class="lead">The System builds your schedule around work, salah and the gym, judges yesterday, and adds bonus quests for your weakest pillar.</p>
       ${needKey(state)}
       <button class="btn primary block" data-act="plan" ${state.settings.groqKey ? '' : 'disabled'}>${icon('sparkles')} Summon today's plan</button>`;
   } else {
@@ -149,7 +149,7 @@ function questsPanel(state, day) {
       <div style="flex:1">
         <div class="sys">CURRENT GRADE</div>
         <div class="grade" style="color:${gradeColor(grade)}">${grade}</div>
-        <div style="color:var(--muted);font-size:14px">${s.earned}/${s.total} XP · ${esc(status)}</div>
+        <div class="meta">${s.earned}/${s.total} XP · ${esc(status)}</div>
       </div>
     </div>
     ${penalty.length ? `<div class="pillar-head"><span class="tag" style="color:var(--danger)">PENALTY</span><span class="name" style="color:var(--danger)">Penalty Zone</span></div>${penalty.map(q => questButton(q)).join('')}` : ''}
@@ -161,7 +161,7 @@ function bossPanel(n) {
   if (n % 7 !== 0) return '';
   return `<section class="panel" style="border-color:rgba(255,204,77,.5)">
     <h3 class="panel-title" style="color:var(--gold)">${icon('crown')} Boss Review: Week ${n / 7}</h3>
-    <p style="margin:0 0 12px;color:var(--muted)">Week ${n / 7} of 13 is done. The System grades the week, finds where you leaked, and sets next week's targets.</p>
+    <p class="lead">Week ${n / 7} of 13 is done. The System grades the week, finds where you leaked, and sets next week's targets.</p>
     <button class="btn block" style="color:var(--gold);border-color:var(--gold)" data-act="boss">${icon('crown')} Face the boss review</button>
   </section>`;
 }
@@ -169,7 +169,7 @@ function bossPanel(n) {
 function judgmentPanel(state, ui, day) {
   let body;
   if (ui.busy.judge) body = loading('JUDGMENT IN PROGRESS...');
-  else body = `${day.verdict ? `<div class="ai-text">${fmtAI(day.verdict)}</div>` : '<p style="margin:0 0 12px;color:var(--muted)">Before you sleep, let the System grade your day and set tomorrow\'s fixes.</p>'}
+  else body = `${day.verdict ? `<div class="ai-text">${fmtAI(day.verdict)}</div>` : '<p class="lead">Before you sleep, let the System grade your day and set tomorrow\'s fixes.</p>'}
     ${needKey(state)}
     <button class="btn block" data-act="judge" ${state.settings.groqKey ? '' : 'disabled'}>${icon('gavel')} ${day.verdict ? 'Judge again' : 'Judge my day'}</button>`;
   return `<section class="panel"><h3 class="panel-title">${icon('gavel')} End-of-Day Judgment</h3>${body}${errorLine(ui.errors.judge)}</section>`;
@@ -180,8 +180,8 @@ export function viewToday(state, ui) {
   const n = dayNumber(state, today);
   if (n < 1) {
     return `<section class="panel"><h3 class="panel-title">${icon('hourglass')} Awaiting Start</h3>
-      <div class="big" style="font-family:var(--display);font-size:30px;text-align:center;color:var(--glow)">T-${1 - n} DAY${1 - n === 1 ? '' : 'S'}</div>
-      <p class="center" style="text-align:center;color:var(--muted)">Your 90 days start on ${esc(state.startDate)}. Use the time to set up your quests in Settings and chat with the coach.</p></section>`;
+      <div class="big">T-${1 - n} DAY${1 - n === 1 ? '' : 'S'}</div>
+      <p class="center meta">Your 90 days start on ${esc(state.startDate)}. Use the time to set up your quests in Settings and chat with the coach.</p></section>`;
   }
   if (n > PROGRAM_DAYS) {
     const stats = computeStats(state);
@@ -236,7 +236,7 @@ function radar(levels) {
   const shape = PILLAR_ORDER.map((p, i) => pt(i, Math.max(0.04, levels[p] / max)).join(',')).join(' ');
   const labels = PILLAR_ORDER.map((p, i) => {
     const [x, y] = pt(i, 1.2);
-    return `<text x="${x}" y="${y + 4}" text-anchor="middle" fill="${PILLARS[p].color}" font-family="Orbitron" font-size="11" font-weight="700">${PILLARS[p].tag} ${levels[p]}</text>`;
+    return `<text x="${x}" y="${y + 4}" text-anchor="middle" fill="${PILLARS[p].color}" font-family="Orbitron" font-size="12.5" font-weight="700">${PILLARS[p].tag} ${levels[p]}</text>`;
   }).join('');
   return `<svg class="radar" viewBox="0 0 300 280" role="img" aria-label="Stat radar">
     ${[0.25, 0.5, 0.75, 1].map(f => `<polygon points="${poly(f)}" fill="none" stroke="rgba(58,209,255,0.15)"/>`).join('')}
@@ -250,7 +250,7 @@ function blueprintPanel(state, ui) {
   const bp = state.blueprint;
   let body;
   if (ui.busy.blueprint) body = loading('FORGING YOUR 90-DAY BLUEPRINT...');
-  else if (!bp) body = `<p style="margin:0 0 12px;color:var(--muted)">Let the System write measurable goals for every pillar across the three phases, using your profile.</p>${needKey(state)}
+  else if (!bp) body = `<p class="lead">Let the System write measurable goals for every pillar across the three phases, using your profile.</p>${needKey(state)}
     <button class="btn primary block" data-act="blueprint" ${state.settings.groqKey ? '' : 'disabled'}>${icon('map')} Forge my blueprint</button>`;
   else {
     const phases = (bp.phases || []).map(ph => `<div class="bp-phase"><h4>${esc(ph.name)}</h4><ul>
@@ -288,7 +288,7 @@ export function viewStatus(state, ui) {
       <div class="rank-badge ${stats.rank.rank}">${stats.rank.rank}</div>
       <div><h2>${esc(state.profile.name || 'Player')}</h2>
         <div class="title">${lastAch ? `Title: ${esc(lastAch.name)}` : 'Title: none yet'}</div>
-        <div style="color:var(--muted);font-size:14px">LV ${stats.level} · ${stats.total} XP · best streak ${st.best} · penalties -${stats.penalties}</div></div>
+        <div class="meta">LV ${stats.level} · ${stats.total} XP · best streak ${st.best} · penalties -${stats.penalties}</div></div>
     </div>
     ${radar(levels)}
     <div class="stat-grid">${statCards}</div>
