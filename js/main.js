@@ -207,13 +207,20 @@ const actions = {
   day: el => openModal(V.dayDetail(state, el.dataset.key)),
   'close-modal': () => closeModal(),
   'test-key': async () => {
+    // Use whatever is typed in the form, even if Save wasn't pressed.
+    const form = document.querySelector('[data-form=ai]');
+    if (form) {
+      state.settings.groqKey = form.elements.groqKey.value.trim();
+      state.settings.model = form.elements.model.value || state.settings.model;
+    }
     ui.busy.test = true; ui.testResult = null; render();
     try {
-      await AI.testKey(state);
-      ui.testResult = { ok: true, msg: `[SYSTEM] Online. ${state.settings.model} is responding.` };
+      const model = await AI.testKey(state);
+      ui.testResult = { ok: true, msg: `[SYSTEM] Online. ${model} is responding. ${state.settings.availableModels.length} models available.` };
     } catch (e) {
       ui.testResult = { ok: false, msg: e.message };
     }
+    persist();
     ui.busy.test = false; render();
   },
   'quest-add': () => {
@@ -348,6 +355,10 @@ setInterval(tick, 60_000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
 
 function boot() {
+  if (AI.RETIRED_MODELS.includes(state.settings.model)) {
+    state.settings.model = AI.MODELS[0];
+    persist();
+  }
   if (state.startDate) {
     rollover(state);
     checkAchievements(state);
@@ -355,10 +366,6 @@ function boot() {
   }
   render();
   if (!state.startDate) return;
-  if (AI.RETIRED_MODELS.includes(state.settings.model)) {
-    state.settings.model = AI.MODELS[0];
-    persist();
-  }
   fetchPrayerTimes(state, dateKey()).then(t => { if (t) { persist(); render(); } });
   const r = state.lagReport;
   if (r && r.date === dateKey() && !r.roast && !r.dismissed && state.settings.groqKey) roast();

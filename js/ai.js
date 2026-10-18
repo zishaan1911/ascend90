@@ -256,6 +256,10 @@ Goals must be specific and measurable (numbers: kg, problems solved, pages, proj
   return groq(state, messages, { json: true, temperature: 0.7, maxTokens: 1800 });
 }
 
+// Loads the live model list, moves off a model Groq no longer serves, then pings it.
 export async function testKey(state) {
-  return groq(state, [{ role: 'user', content: 'Reply with exactly: SYSTEM ONLINE' }], { temperature: 0, maxTokens: 200 });
+  const available = await listModels(state);
+  if (!available.includes(state.settings.model)) state.settings.model = pickModel(available);
+  await groq(state, [{ role: 'user', content: 'Reply with exactly: SYSTEM ONLINE' }], { temperature: 0, maxTokens: 200 });
+  return state.settings.model;
 }

@@ -414,6 +414,12 @@ export function viewOnboarding(state) {
     </form></section>`;
 }
 
+function modelOptions(state) {
+  const live = state.settings.availableModels || [];
+  const ids = [...new Set([state.settings.model, ...(live.length ? live : MODELS)].filter(Boolean))];
+  return ids.map(m => `<option value="${esc(m)}" ${m === state.settings.model ? 'selected' : ''}>${esc(m)}</option>`).join('');
+}
+
 export function viewSettings(state, ui) {
   const qrows = state.quests.map(q => `<div class="q-edit" data-id="${esc(q.id)}">
       <input name="title" value="${esc(q.title)}" aria-label="Quest title">
@@ -425,7 +431,8 @@ export function viewSettings(state, ui) {
     <form data-form="ai">
       <label class="field"><span>API key</span><input name="groqKey" type="password" autocomplete="off" placeholder="gsk_..." value="${esc(state.settings.groqKey)}"></label>
       <p class="hint">Stored only on this device. Get one at <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a>.</p>
-      <label class="field"><span>Model</span><input name="model" list="models" value="${esc(state.settings.model)}"><datalist id="models">${MODELS.map(m => `<option value="${m}">`).join('')}</datalist></label>
+      <label class="field"><span>Model</span><select name="model">${modelOptions(state)}</select></label>
+      <p class="hint">${state.settings.availableModels?.length ? 'Live list from Groq.' : 'Press Test to load the models your key can use.'} If a model gets retired, the app switches to a working one by itself.</p>
       <div class="btn-row"><button class="btn primary">${icon('save')} Save</button><button type="button" class="btn" data-act="test-key" ${ui.busy.test ? 'disabled' : ''}>${icon('plug-zap')} ${ui.busy.test ? 'Testing...' : 'Test'}</button></div>
       ${ui.testResult ? `<p class="hint" style="margin-top:10px;color:${ui.testResult.ok ? 'var(--good)' : 'var(--danger)'}">${esc(ui.testResult.msg)}</p>` : ''}
     </form></section>
