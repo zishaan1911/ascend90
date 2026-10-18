@@ -36,8 +36,7 @@ export function defaultState() {
     lastFinalized: null,
     profile: {
       name: '', age: '', heightCm: '', weightKg: '', goalWeightKg: '',
-      city: '', country: '',
-      wakeTime: '05:30', sleepTime: '22:30', workStart: '09:00', workEnd: '17:00',
+      wakeTime: '06:00', sleepTime: '22:30', workStart: '09:00', workEnd: '17:00',
       gymTime: 'evening', leetcodeSolved: '', goals: '', weaknesses: '',
     },
     settings: { groqKey: '', model: 'openai/gpt-oss-120b', availableModels: [] },
@@ -47,7 +46,6 @@ export function defaultState() {
     chat: [],
     memory: [],          // Q&A the coach has learned about the player
     blueprint: null,
-    prayerTimes: {},
     lagReport: null,
   };
 }
@@ -58,14 +56,35 @@ export function load() {
     if (!raw) return defaultState();
     const parsed = JSON.parse(raw);
     const base = defaultState();
-    return {
+    return migrate({
       ...base, ...parsed,
       profile: { ...base.profile, ...parsed.profile },
       settings: { ...base.settings, ...parsed.settings },
-    };
+    });
   } catch {
     return defaultState();
   }
+}
+
+// Saves from before Religiousmax was replaced by Mindmax: drop the old pillar's quests
+// everywhere, give the template the Mindmax quests, and carry old penalties over to Mind.
+export function migrate(state) {
+  delete state.prayerTimes;
+  delete state.profile.city;
+  delete state.profile.country;
+  delete state.achievements.fajr7;
+  delete state.achievements.salah7;
+  if (state.quests.some(q => q.pillar === 'deen')) {
+    const mind = DEFAULT_QUESTS.filter(q => q.pillar === 'mind').map(q => ({ ...q }));
+    state.quests = [...mind, ...state.quests.filter(q => q.pillar !== 'deen')];
+    if (state.blueprint?.phases?.some(ph => ph.goals?.deen)) state.blueprint = null;
+  }
+  for (const day of Object.values(state.days)) {
+    day.quests = day.quests.filter(q => q.pillar !== 'deen');
+    const pen = day.penaltyByPillar;
+    if (pen?.deen) { pen.mind = (pen.mind || 0) + pen.deen; delete pen.deen; }
+  }
+  return state;
 }
 
 export function save(state) {

@@ -1,6 +1,6 @@
 // App bootstrap, rendering, and all user actions.
 import { PILLARS } from './data.js';
-import { load, save, clearAll, defaultState, dateKey, uid } from './store.js';
+import { load, save, clearAll, defaultState, migrate, dateKey, uid } from './store.js';
 import {
   rollover, ensureDay, syncTemplateToDay, computeStats, checkAchievements, dayStats, dayNumber, inProgram,
 } from './game.js';
@@ -163,7 +163,7 @@ function importData(file) {
       if (!confirm('Replace all current progress with this backup?')) return;
       const key = state.settings.groqKey;
       const base = defaultState();
-      state = { ...base, ...data, profile: { ...base.profile, ...data.profile }, settings: { ...base.settings, ...data.settings } };
+      state = migrate({ ...base, ...data, profile: { ...base.profile, ...data.profile }, settings: { ...base.settings, ...data.settings } });
       if (!state.settings.groqKey) state.settings.groqKey = key;
       rollover(state);
       persist();
@@ -355,6 +355,8 @@ function boot() {
   }
   if (state.startDate) {
     rollover(state);
+    // Pick up template changes (e.g. migrated pillars) in today's list; ticks are kept.
+    if (today()) syncTemplateToDay(state, dateKey());
     checkAchievements(state);
     persist();
   }
