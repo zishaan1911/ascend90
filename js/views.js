@@ -89,7 +89,7 @@ function briefingPanel(state, ui, day) {
   let body;
   if (ui.busy.plan) body = loading('THE SYSTEM IS CALCULATING YOUR DAY...');
   else if (!plan) {
-    body = `<p class="lead">The System builds your schedule around work, salah and the gym, judges yesterday, and adds bonus quests for your weakest pillar.</p>
+    body = `<p class="lead">The System builds your schedule around work, the gym and your mind training, judges yesterday, and adds bonus quests for your weakest pillar.</p>
       ${needKey(state)}
       <button class="btn primary block" data-act="plan" ${state.settings.groqKey ? '' : 'disabled'}>${icon('sparkles')} Summon today's plan</button>`;
   } else {
@@ -113,11 +113,10 @@ function briefingPanel(state, ui, day) {
   </section>`;
 }
 
-function questButton(q, times) {
+function questButton(q) {
   const pillar = PILLARS[q.pillar];
   const sub = q.kind === 'penalty' ? 'PENALTY QUEST · skip it and lose 75 XP'
-    : q.kind === 'bonus' ? 'AI BONUS QUEST'
-    : q.prayer && times?.[q.prayer] ? `${q.prayer.toUpperCase()} · ${times[q.prayer]}` : '';
+    : q.kind === 'bonus' ? 'AI BONUS QUEST' : '';
   return `<button class="quest ${q.done ? 'done' : ''} ${q.kind}" data-act="toggle" data-id="${esc(q.id)}" aria-pressed="${q.done}">
     <span class="box" style="${q.done && q.kind !== 'penalty' ? `background:${pillar.color};border-color:${pillar.color};box-shadow:0 0 10px ${pillar.color}` : ''}">${icon('check')}</span>
     <span class="q-title">${esc(q.title)}${sub ? `<span class="q-sub">${esc(sub)}</span>` : ''}</span>
@@ -128,7 +127,6 @@ function questButton(q, times) {
 function questsPanel(state, day) {
   const s = dayStats(day);
   const grade = gradeFor(s.pct);
-  const times = state.prayerTimes[dateKey()];
   const penalty = day.quests.filter(q => q.kind === 'penalty');
   const groups = PILLAR_ORDER.map(p => {
     const qs = day.quests.filter(q => q.pillar === p && q.kind !== 'penalty');
@@ -137,7 +135,7 @@ function questsPanel(state, day) {
     const P = PILLARS[p];
     return `<div class="pillar-head"><span class="tag" style="color:${P.color}">${P.tag}</span><span class="name">${P.name}</span><span class="count">${bp.earned}/${bp.total}</span></div>
       <div class="mini-bar"><i style="width:${bp.total ? (bp.earned / bp.total) * 100 : 0}%;background:${P.color}"></i></div>
-      ${qs.map(q => questButton(q, times)).join('')}`;
+      ${qs.map(q => questButton(q)).join('')}`;
   }).join('');
   const status = s.pct >= STREAK_THRESHOLD ? 'Streak secured.'
     : s.pct >= PENALTY_THRESHOLD ? `${STREAK_THRESHOLD}% keeps your streak.`
@@ -199,7 +197,7 @@ export const CHIPS = [
   "I'm about to slack. Stop me.",
   'Build my gym split around a 9-5',
   'Give me a LeetCode roadmap for 90 days',
-  'How do I never miss Fajr?',
+  'Teach me to meditate properly',
   'Upgrade my style on a budget',
   'Skincare routine for my face',
   'What should I build as a side project?',
@@ -387,15 +385,13 @@ function profileFields(p) {
     <div class="grid2">${f('age', 'Age', 'number', 'inputmode="numeric"')}${f('heightCm', 'Height (cm)', 'number', 'inputmode="decimal"')}</div>
     <div class="grid2">${f('weightKg', 'Weight (kg)', 'number', 'step="0.1" inputmode="decimal"')}${f('goalWeightKg', 'Goal (kg)', 'number', 'step="0.1" inputmode="decimal"')}</div>
     ${f('leetcodeSolved', 'LeetCode problems solved so far', 'number', 'inputmode="numeric"')}
-    <div class="grid2">${f('city', 'City')}${f('country', 'Country')}</div>
-    <p class="hint">City and country are sent only to aladhan.com to get accurate salah times.</p>
     <div class="grid2">${f('wakeTime', 'Wake time', 'time')}${f('sleepTime', 'Sleep time', 'time')}</div>
     <div class="grid2">${f('workStart', 'Work starts', 'time')}${f('workEnd', 'Work ends', 'time')}</div>
     <label class="field"><span>Gym time</span><select name="gymTime">
       ${['morning (before work)', 'lunch', 'evening (after work)', 'night'].map(o => `<option ${p.gymTime === o || (p.gymTime && o.startsWith(p.gymTime)) ? 'selected' : ''}>${o}</option>`).join('')}
     </select></label>
-    <label class="field"><span>Your 90-day goals</span><textarea name="goals" placeholder="e.g. Drop to 75kg with visible abs, solve 250 LeetCode, ship 2 apps, pray all 5 on time, read 8 books">${esc(p.goals)}</textarea></label>
-    <label class="field"><span>Why you lag (be honest, the System uses this against you)</span><textarea name="weaknesses" placeholder="e.g. Doomscroll at night, skip gym when tired after work, miss Fajr when I sleep late">${esc(p.weaknesses)}</textarea></label>`;
+    <label class="field"><span>Your 90-day goals</span><textarea name="goals" placeholder="e.g. Drop to 75kg with visible abs, solve 250 LeetCode, ship 2 apps, meditate daily, read 8 books">${esc(p.goals)}</textarea></label>
+    <label class="field"><span>Why you lag (be honest, the System uses this against you)</span><textarea name="weaknesses" placeholder="e.g. Doomscroll at night, skip gym when tired after work, snooze when I sleep late">${esc(p.weaknesses)}</textarea></label>`;
 }
 
 export function viewOnboarding(state) {

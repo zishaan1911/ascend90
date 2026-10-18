@@ -1,8 +1,8 @@
 // Offline cache for the app shell. API calls (Groq, Aladhan) always go to the network.
-const CACHE = 'ascend90-v2';
+const CACHE = 'ascend90-v3';
 const SHELL = [
   './', 'index.html', 'styles.css', 'manifest.webmanifest',
-  'js/main.js', 'js/views.js', 'js/game.js', 'js/ai.js', 'js/store.js', 'js/data.js', 'js/prayer.js',
+  'js/main.js', 'js/views.js', 'js/game.js', 'js/ai.js', 'js/store.js', 'js/data.js',
   'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png',
 ];
 const CDN = ['unpkg.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];

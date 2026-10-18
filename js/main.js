@@ -5,7 +5,6 @@ import {
   rollover, ensureDay, syncTemplateToDay, computeStats, checkAchievements, dayStats, dayNumber, inProgram,
 } from './game.js';
 import * as AI from './ai.js';
-import { fetchPrayerTimes } from './prayer.js';
 import * as V from './views.js';
 
 let state = load();
@@ -68,7 +67,6 @@ async function runAI(key, fn) {
 function today() { return state.days[dateKey()]; }
 
 async function doPlan() {
-  await fetchPrayerTimes(state, dateKey());
   await runAI('plan', async () => {
     const plan = await AI.generatePlan(state);
     const day = today();
@@ -263,7 +261,6 @@ const forms = {
     persist();
     ui.view = 'today';
     render();
-    fetchPrayerTimes(state, dateKey()).then(t => { if (t) { persist(); render(); } });
     openModal(`<div class="center">
       <div class="sys">[SYSTEM] NOTIFICATION</div>
       <div class="big">YOU HAVE BEEN CHOSEN</div>
@@ -301,13 +298,10 @@ const forms = {
     render();
   },
   profile: data => {
-    const cityChanged = data.city !== state.profile.city || data.country !== state.profile.country;
     state.profile = profileFrom(data);
-    if (cityChanged) state.prayerTimes = {};
     persist();
     toast('[SYSTEM] Profile saved');
     render();
-    if (cityChanged) fetchPrayerTimes(state, dateKey()).then(t => { if (t) { persist(); render(); } });
   },
 };
 
@@ -366,7 +360,6 @@ function boot() {
   }
   render();
   if (!state.startDate) return;
-  fetchPrayerTimes(state, dateKey()).then(t => { if (t) { persist(); render(); } });
   const r = state.lagReport;
   if (r && r.date === dateKey() && !r.roast && !r.dismissed && state.settings.groqKey) roast();
 }
