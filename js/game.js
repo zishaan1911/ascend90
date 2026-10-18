@@ -1,6 +1,6 @@
 // Game rules: day lifecycle, XP, levels, ranks, streaks, penalties, achievements.
 import {
-  PILLARS, PRAYERS, PENALTY_QUESTS, PENALTY_THRESHOLD, STREAK_THRESHOLD,
+  PILLARS, PENALTY_QUESTS, PENALTY_THRESHOLD, STREAK_THRESHOLD,
   PENALTY_QUEST_FAIL_XP, RANKS, PHASES, GRADES, ACHIEVEMENTS,
 } from './data.js';
 import { dateKey, addDays, diffDays } from './store.js';
@@ -205,15 +205,15 @@ export function checkAchievements(state) {
     for (const [, d] of tl) { if (d && pred(d)) { r++; m = Math.max(m, r); } else r = 0; }
     return m;
   };
-  const prayed = (d, p) => d.quests.some(q => q.prayer === p && q.done);
+  const did = (d, id) => d.quests.some(q => q.id === id && q.done);
   const judged = state.lastFinalized ? dayNumber(state, state.lastFinalized) : 0;
 
   const met = {
     awakened: tl.some(([, d]) => pctOf(d) >= 70),
     flawless: tl.some(([, d]) => d && pctOf(d) === 100),
     streak3: best >= 3, streak7: best >= 7, streak14: best >= 14, streak30: best >= 30,
-    fajr7: runOf(d => prayed(d, 'Fajr')) >= 7,
-    salah7: runOf(d => PRAYERS.every(p => prayed(d, p))) >= 7,
+    dawn7: runOf(d => did(d, 'wake')) >= 7,
+    monk7: runOf(d => did(d, 'meditate')) >= 7,
     gym20: count('gym') >= 20,
     dsa30: count('dsa') >= 30,
     ship30: count('ship') >= 30,
