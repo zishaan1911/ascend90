@@ -5,22 +5,19 @@ export const PILLARS = {
   engineer:  { name: 'Engineermax',  tag: 'ENG',  color: '#3ad1ff' },
   character: { name: 'Charactermax', tag: 'CHR',  color: '#ffb020' },
   appeal:    { name: 'Appealmax',    tag: 'APL',  color: '#c77dff' },
-  deen:      { name: 'Religiousmax', tag: 'DEEN', color: '#2ee59d' },
+  mind:      { name: 'Mindmax',      tag: 'MND',  color: '#2ee59d' },
   intellect: { name: 'Intellectmax', tag: 'INT',  color: '#6f9bff' },
 };
 
-export const PILLAR_ORDER = ['deen', 'looks', 'engineer', 'character', 'appeal', 'intellect'];
-
-export const PRAYERS = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+export const PILLAR_ORDER = ['looks', 'engineer', 'character', 'appeal', 'mind', 'intellect'];
 
 export const DEFAULT_QUESTS = [
-  { id: 'fajr',     pillar: 'deen', xp: 25, title: 'Pray Fajr on time', prayer: 'Fajr' },
-  { id: 'dhuhr',    pillar: 'deen', xp: 15, title: 'Pray Dhuhr', prayer: 'Dhuhr' },
-  { id: 'asr',      pillar: 'deen', xp: 15, title: 'Pray Asr', prayer: 'Asr' },
-  { id: 'maghrib',  pillar: 'deen', xp: 15, title: 'Pray Maghrib', prayer: 'Maghrib' },
-  { id: 'isha',     pillar: 'deen', xp: 15, title: 'Pray Isha', prayer: 'Isha' },
-  { id: 'quran',    pillar: 'deen', xp: 20, title: 'Read 2 pages of Quran' },
-  { id: 'adhkar',   pillar: 'deen', xp: 10, title: 'Morning + evening adhkar' },
+  { id: 'meditate',   pillar: 'mind', xp: 25, title: '10 min meditation' },
+  { id: 'stoic',      pillar: 'mind', xp: 15, title: 'Stoic reflection: 1 passage + 1 takeaway' },
+  { id: 'gratitude',  pillar: 'mind', xp: 10, title: 'Write 3 things you are grateful for' },
+  { id: 'nocomplain', pillar: 'mind', xp: 20, title: 'Zero complaining, zero excuses today' },
+  { id: 'detox',      pillar: 'mind', xp: 20, title: '1 hour fully phone-free' },
+  { id: 'visualize',  pillar: 'mind', xp: 10, title: 'Review goals + visualize for 2 min' },
 
   { id: 'gym',      pillar: 'looks', xp: 40, title: 'Train: gym session or workout' },
   { id: 'protein',  pillar: 'looks', xp: 15, title: 'Hit protein target' },
@@ -52,7 +49,7 @@ export const PENALTY_QUESTS = [
   'No phone for the first 2 hours after waking',
   'Run or walk 5 km',
   '2 extra LeetCode problems + read 10 extra pages',
-  'Pray 2 rakat nafl + 10 min of dhikr, then 50 burpees',
+  '20 min meditation, then 50 burpees',
 ];
 
 // Day completion below this % triggers the Penalty Zone.
@@ -88,8 +85,8 @@ export const ACHIEVEMENTS = [
   { id: 'streak7',    name: 'Week of Iron',        desc: '7-day streak' },
   { id: 'streak14',   name: 'Unbreakable',         desc: '14-day streak' },
   { id: 'streak30',   name: "Monarch's Discipline", desc: '30-day streak' },
-  { id: 'fajr7',      name: 'Dawn Hunter',         desc: 'Fajr on time 7 days straight' },
-  { id: 'salah7',     name: 'Unbroken Salah',      desc: 'All 5 prayers, 7 days straight' },
+  { id: 'dawn7',      name: 'Dawn Hunter',         desc: 'Wake on time 7 days straight' },
+  { id: 'monk7',      name: 'Monk Mode',           desc: 'Meditate 7 days straight' },
   { id: 'gym20',      name: 'Iron Body',           desc: '20 training sessions' },
   { id: 'dsa30',      name: 'Algorithm Grinder',   desc: 'LeetCode quest done 30 times' },
   { id: 'ship30',     name: 'Shipper',             desc: 'Side project deep work 30 times' },
