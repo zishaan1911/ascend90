@@ -5,45 +5,92 @@ import {
   dayNumber, phaseFor, computeStats, streaks, dayStats, weakestPillars, timeline, PROGRAM_DAYS,
 } from './game.js';
 
-const ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions';
+const BASE = 'https://api.groq.com/openai/v1';
 
+// Preferred models, best first. The live list from Groq decides what is actually used.
 export const MODELS = [
-  'llama-3.3-70b-versatile',
   'openai/gpt-oss-120b',
   'openai/gpt-oss-20b',
-  'llama-3.1-8b-instant',
 ];
+// Models Groq has shut down; saved settings pointing at these get migrated.
+export const RETIRED_MODELS = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'llama3-70b-8192', 'llama3-8b-8192', 'mixtral-8x7b-32768', 'gemma2-9b-it'];
+
+// Not chat models: speech, moderation, embeddings.
+const NON_CHAT = /whisper|tts|playai|orpheus|guard|embed|distil|compound/i;
 
 export class AIError extends Error {}
 
-async function groq(state, messages, { json = false, temperature = 0.85, maxTokens = 1200 } = {}) {
+function authHeaders(state) {
   const key = state.settings.groqKey?.trim();
   if (!key) throw new AIError('No Groq API key. Add it in Settings.');
+  return { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` };
+}
+
+// Fetch the chat models this key can use and store them in settings.
+export async function listModels(state) {
+  let res;
+  try {
+    res = await fetch(`${BASE}/models`, { headers: authHeaders(state) });
+  } catch {
+    throw new AIError('Could not reach Groq. Check your connection.');
+  }
+  if (res.status === 401) throw new AIError('Groq rejected your API key. Check it in Settings.');
+  if (!res.ok) throw new AIError(`Groq error ${res.status} while listing models`);
+  const ids = ((await res.json()).data || [])
+    .filter(m => m.active !== false && !NON_CHAT.test(m.id))
+    .map(m => m.id)
+    .sort((a, b) => rankModel(a) - rankModel(b) || a.localeCompare(b));
+  state.settings.availableModels = ids;
+  return ids;
+}
+
+function rankModel(id) {
+  const i = MODELS.indexOf(id);
+  return i === -1 ? MODELS.length : i;
+}
+
+export function pickModel(available) {
+  return MODELS.find(m => available.includes(m)) || available[0] || MODELS[0];
+}
+
+const isModelGone = (status, msg) =>
+  status === 404 || /model.*(does not exist|not found|decommissioned|deprecated|no longer supported)/i.test(msg);
+
+async function groq(state, messages, { json = false, temperature = 0.85, maxTokens = 1200 } = {}, retried = false) {
+  const model = state.settings.model || MODELS[0];
+  const reasoning = model.startsWith('openai/gpt-oss');
   const body = {
-    model: state.settings.model || MODELS[0],
-    messages, temperature, max_tokens: maxTokens,
+    model, messages, temperature,
+    // Reasoning models spend tokens thinking before they answer, so give them headroom.
+    max_tokens: reasoning ? maxTokens + 2000 : maxTokens,
   };
+  if (reasoning) body.reasoning_effort = 'low';
   if (json) body.response_format = { type: 'json_object' };
 
   let res;
   try {
-    res = await fetch(ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
-      body: JSON.stringify(body),
-    });
+    res = await fetch(`${BASE}/chat/completions`, { method: 'POST', headers: authHeaders(state), body: JSON.stringify(body) });
   } catch {
     throw new AIError('Could not reach Groq. Check your connection.');
   }
   if (!res.ok) {
     let msg = `Groq error ${res.status}`;
     try { msg = (await res.json()).error?.message || msg; } catch { /* keep default */ }
-    if (res.status === 401) msg = 'Groq rejected your API key. Check it in Settings.';
-    if (res.status === 429) msg = 'Groq rate limit hit. Wait a minute and try again.';
+    if (res.status === 401) throw new AIError('Groq rejected your API key. Check it in Settings.');
+    if (res.status === 429) throw new AIError('Groq rate limit hit. Wait a minute and try again.');
+    if (!retried && isModelGone(res.status, msg)) {
+      // Saved model was retired: switch to one Groq still serves and try once more.
+      const next = pickModel(await listModels(state));
+      if (next && next !== model) {
+        state.settings.model = next;
+        return groq(state, messages, { json, temperature, maxTokens }, true);
+      }
+    }
     throw new AIError(msg);
   }
   const data = await res.json();
   const text = data.choices?.[0]?.message?.content?.trim() || '';
+  if (!text) throw new AIError('The System went silent. Try again.');
   if (!json) return text;
   return parseJson(text);
 }

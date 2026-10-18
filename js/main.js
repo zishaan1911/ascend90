@@ -355,6 +355,10 @@ function boot() {
   }
   render();
   if (!state.startDate) return;
+  if (AI.RETIRED_MODELS.includes(state.settings.model)) {
+    state.settings.model = AI.MODELS[0];
+    persist();
+  }
   fetchPrayerTimes(state, dateKey()).then(t => { if (t) { persist(); render(); } });
   const r = state.lagReport;
   if (r && r.date === dateKey() && !r.roast && !r.dismissed && state.settings.groqKey) roast();

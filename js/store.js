@@ -40,7 +40,7 @@ export function defaultState() {
       wakeTime: '05:30', sleepTime: '22:30', workStart: '09:00', workEnd: '17:00',
       gymTime: 'evening', leetcodeSolved: '', goals: '', weaknesses: '',
     },
-    settings: { groqKey: '', model: 'llama-3.3-70b-versatile' },
+    settings: { groqKey: '', model: 'openai/gpt-oss-120b', availableModels: [] },
     quests: DEFAULT_QUESTS.map(q => ({ ...q })),
     days: {},
     achievements: {},
