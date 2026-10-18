@@ -384,9 +384,10 @@ function profileFields(p) {
     `<label class="field"><span>${label}</span><input name="${name}" type="${type}" value="${esc(p[name])}" ${extra}></label>`;
   return `
     ${f('name', 'Name', 'text', 'required autocomplete="given-name"')}
-    <div class="grid3">${f('age', 'Age', 'number', 'inputmode="numeric"')}${f('heightCm', 'Height (cm)', 'number', 'inputmode="decimal"')}${f('weightKg', 'Weight (kg)', 'number', 'step="0.1" inputmode="decimal"')}</div>
-    <div class="grid2">${f('goalWeightKg', 'Goal weight (kg)', 'number', 'step="0.1" inputmode="decimal"')}${f('leetcodeSolved', 'LeetCode solved so far', 'number', 'inputmode="numeric"')}</div>
-    <div class="grid2">${f('city', 'City (for prayer times)')}${f('country', 'Country')}</div>
+    <div class="grid2">${f('age', 'Age', 'number', 'inputmode="numeric"')}${f('heightCm', 'Height (cm)', 'number', 'inputmode="decimal"')}</div>
+    <div class="grid2">${f('weightKg', 'Weight (kg)', 'number', 'step="0.1" inputmode="decimal"')}${f('goalWeightKg', 'Goal (kg)', 'number', 'step="0.1" inputmode="decimal"')}</div>
+    ${f('leetcodeSolved', 'LeetCode problems solved so far', 'number', 'inputmode="numeric"')}
+    <div class="grid2">${f('city', 'City')}${f('country', 'Country')}</div>
     <p class="hint">City and country are sent only to aladhan.com to get accurate salah times.</p>
     <div class="grid2">${f('wakeTime', 'Wake time', 'time')}${f('sleepTime', 'Sleep time', 'time')}</div>
     <div class="grid2">${f('workStart', 'Work starts', 'time')}${f('workEnd', 'Work ends', 'time')}</div>
