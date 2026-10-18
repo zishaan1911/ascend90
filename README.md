@@ -1,8 +1,8 @@
 # ASCEND 90
 
-A Solo Leveling style 90-day transformation app across six pillars: Looksmax, Engineermax, Charactermax, Appealmax, Religiousmax (Islam) and Intellectmax. A Groq-powered drill sergeant coach called "The System" plans your day and roasts you when you lag.
+A Solo Leveling style 90-day transformation app across six pillars: Looksmax, Engineermax, Charactermax, Appealmax, Mindmax and Intellectmax. A Groq-powered drill sergeant coach called "The System" plans your day and roasts you when you lag.
 
-It's a plain static web app with no build step and no backend. All data stays in your browser's localStorage. Your Groq key is sent only to `api.groq.com`, and your city/country only to `api.aladhan.com` for prayer times.
+It's a plain static web app with no build step and no backend. All data stays in your browser's localStorage. Your Groq key is sent only to `api.groq.com`.
 
 ## Run locally
 
@@ -36,4 +36,3 @@ Then open the URL on your phone. On Android Chrome, use "Add to Home screen" or 
 - `js/ai.js`: Groq prompts (plan, judgment, lag roast, chat, blueprint)
 - `js/views.js`: screen markup
 - `js/main.js`: app wiring and actions
-- `js/prayer.js`: Aladhan prayer times
